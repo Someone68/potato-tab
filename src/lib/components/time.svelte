@@ -14,3 +14,9 @@
 </script>
 
 <h1 class={className} {...rest}>{formatted_time}</h1>
+
+<style>
+	h1 {
+		font-size: 48px;
+	}
+</style>
