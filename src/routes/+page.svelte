@@ -2,6 +2,8 @@
 	import Time from '$lib/components/time.svelte';
 	import Section from '$lib/components/section.svelte';
 	import Background from '$lib/components/background.svelte';
+	import Button from '$lib/components/button.svelte';
+	import Switch from '$lib/components/switch.svelte';
 	import { readToken, initTheme } from '$lib/index';
 
 	const theme = initTheme();
@@ -21,6 +23,16 @@
 
 <Section>
 	<Time />
+	<Button variant="regular" filled={true}>regular filled</Button>
+	<Button variant="primary" filled={true}>primary filled</Button>
+	<Button variant="secondary" filled={true}>secondary filled</Button>
+	<Button variant="tertiary" filled={true}>tertiary filled</Button>
+	<Button variant="regular" filled={false}>regular outline</Button>
+	<Button variant="primary" filled={false}>primary outline</Button>
+	<Button variant="secondary" filled={false}>secondary outline</Button>
+	<Button variant="tertiary" filled={false}>tertiary outline</Button>
+
+	<Switch />
 	{#each Object.entries(theme?.dark ?? {}) as [key, value] (key)}
 		<p style="color: {value}">{key}: {value}</p>
 	{/each}

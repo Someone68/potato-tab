@@ -1,5 +1,5 @@
 <script lang="ts">
-	type Variant = 'regular' | 'accent' | 'success' | 'warning' | 'error';
+	type Variant = 'regular' | 'primary' | 'secondary' | 'tertiary';
 
 	let {
 		variant = 'regular',
@@ -26,10 +26,10 @@
 
 		&.filled {
 			&.regular {
-				background-color: var(--surface);
+				background-color: var(--cs-surface-container);
 			}
 			&.primary {
-				background-color: var(--accent);
+				background-color: var(--cs-primary-container);
 			}
 			&.secondary {
 				background-color: var(--cs-secondary-container);
@@ -52,9 +52,9 @@
 		border-color: transparent;
 
 		&:not(.filled) {
-			background-color: var(--cs-bg);
+			background-color: var(--cs-surface);
 			&.regular {
-				border-color: var(--cs-fg-muted);
+				border-color: var(--cs-outline);
 			}
 			&.primary {
 				border-color: var(--cs-primary);
@@ -67,11 +67,11 @@
 			}
 
 			&:hover {
-				background-color: var(--cs-surface);
+				background-color: var(--cs-surface-container-low);
 			}
 
 			&:active {
-				background-color: var(--cs-overlay);
+				background-color: var(--cs-surface-container);
 			}
 		}
 
