@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	let { class: className = '', children, ...rest } = $props();
 </script>
 
@@ -8,8 +8,9 @@
 
 <style>
 	section {
-		border-left: 4px solid var(--outline);
-		padding: 12px;
+		border-left: 4px solid var(--cs-outline);
+		padding: 0 12px;
 		margin-left: 12px;
+		margin-top: 10px;
 	}
 </style>

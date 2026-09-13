@@ -18,47 +18,9 @@
 			padding: 0;
 		}
 
-		html,
 		body {
-			width: 100%;
-			height: 100vh;
-		}
-
-		:root {
-			/* ayu dark */
-			--bg: #0b0e14;
-			--surface: #0d1017;
-			--surface-alt: #0f131a;
-			--surface-hover: #131721;
-			--surface-sunk: #11151c;
-
-			--fg: #bfbdb6;
-			--fg-muted: #565b66;
-			--fg-subtle: #acb6bf8c;
-			--fg-on-accent: #0b0e14;
-
-			--outline: #565b6645;
-			--outline-strong: #565b6680;
-			--shadow: #00000080;
-
-			--accent: #e6b450;
-			--accent-hover: #e1af4b;
-			--accent-bg: #e6b45033;
-			--accent-border: #e6b4504d;
-
-			--selection: #409fff40;
-			--selection-dim: #409fff21;
-
-			--error: #d95757;
-			--success: #7fd962;
-			--info: #73b8ff;
-			--danger-alt: #f26d78;
-			--warning: #ffb454;
-		}
-
-		body {
-			background-color: var(--bg);
-			color: var(--fg);
+			background-color: var(--cs-surface);
+			color: var(--cs-on-surface);
 			font-family: 'Iosevka Charon Mono', monospace;
 		}
 	}
