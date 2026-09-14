@@ -103,3 +103,9 @@
 		<p>top right</p>
 	</Section>
 </Corner>
+
+<Corner corner="bottom_left">
+	<Section corner="bottom_left">
+		<p>bottom left</p>
+	</Section>
+</Corner>

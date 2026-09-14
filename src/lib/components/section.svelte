@@ -3,15 +3,17 @@
 
 	let {
 		corner = 'top_left',
+		border = true,
 		children,
 		...rest
 	}: {
 		corner?: Corner;
+		border?: boolean;
 		children: import('svelte').Snippet;
 	} = $props();
 </script>
 
-<section class={corner} {...rest}>
+<section class={corner} style={border ? undefined : 'border: none;'} {...rest}>
 	{@render children()}
 </section>
 
