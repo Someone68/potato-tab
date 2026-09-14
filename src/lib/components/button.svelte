@@ -1,12 +1,14 @@
 <script lang="ts">
-	type Variant = 'regular' | 'primary' | 'secondary' | 'tertiary';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import type { Variant } from '$lib/misc';
 
 	let {
 		variant = 'regular',
 		filled = false,
 		disabled = false,
-		children
-	}: {
+		children,
+		...rest
+	}: HTMLButtonAttributes & {
 		variant: Variant;
 		filled?: boolean;
 		disabled?: boolean;
@@ -14,65 +16,79 @@
 	} = $props();
 </script>
 
-<button class="{variant} {filled ? 'filled' : ''} {disabled ? 'disabled' : ''}">
+<button
+	class="{variant} {filled ? 'filled' : ''} {disabled ? 'disabled' : ''}"
+	{disabled}
+	{...rest}
+>
 	{@render children?.()}
 </button>
 
 <style>
 	button {
 		padding: 7px 10px;
-		color: var(--cs-fg);
 		cursor: pointer;
+		--state: transparent;
 
 		&.filled {
 			&.regular {
-				background-color: var(--cs-surface-container);
+				--bg: var(--cs-surface-container);
+				--fg: var(--cs-on-surface);
 			}
 			&.primary {
-				background-color: var(--cs-primary-container);
+				--bg: var(--cs-primary-container);
+				--fg: var(--cs-on-primary-container);
 			}
 			&.secondary {
-				background-color: var(--cs-secondary-container);
+				--bg: var(--cs-secondary-container);
+				--fg: var(--cs-on-secondary-container);
 			}
 			&.tertiary {
-				background-color: var(--cs-tertiary-container);
+				--bg: var(--cs-tertiary-container);
+				--fg: var(--cs-on-tertiary-container);
 			}
-
-			&:hover {
-				filter: brightness(120%);
-			}
-
-			&:active {
-				filter: brightness(90%);
+			&.error {
+				--bg: var(--cs-error-container);
+				--fg: var(--cs-on-error-container);
 			}
 		}
 
-		border-width: 1px;
-		border-style: solid;
-		border-color: transparent;
-
 		&:not(.filled) {
-			background-color: var(--cs-surface);
+			--bg: var(--cs-surface);
+			--fg: var(--cs-on-surface);
 			&.regular {
 				border-color: var(--cs-outline);
 			}
 			&.primary {
 				border-color: var(--cs-primary);
+				--fg: var(--cs-primary);
 			}
 			&.secondary {
 				border-color: var(--cs-secondary);
+				--fg: var(--cs-secondary);
 			}
 			&.tertiary {
 				border-color: var(--cs-tertiary);
+				--fg: var(--cs-tertiary);
 			}
+			&.error {
+				border-color: var(--cs-error);
+				--fg: var(--cs-error);
+			}
+		}
 
-			&:hover {
-				background-color: var(--cs-surface-container-low);
-			}
+		color: var(--fg);
+		background-color: color-mix(in srgb, var(--fg) var(--state-opacity, 0%), var(--bg));
 
-			&:active {
-				background-color: var(--cs-surface-container);
-			}
+		border-width: 1px;
+		border-style: solid;
+		border-color: transparent;
+
+		&:hover:not(.disabled) {
+			--state-opacity: 8%;
+		}
+		&:active:not(.disabled) {
+			--state-opacity: 12%;
 		}
 
 		&.disabled {

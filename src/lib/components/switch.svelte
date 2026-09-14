@@ -47,7 +47,9 @@
 		background: var(--cs-surface-container);
 		transition: background 150ms ease;
 		flex: none;
+		border: 1px solid var(--cs-outline);
 	}
+
 	.thumb {
 		position: absolute;
 		top: 4px;
@@ -63,6 +65,7 @@
 
 	input:checked + .track {
 		background: var(--cs-primary);
+		border-color: var(--cs-primary);
 	}
 	input:checked + .track .thumb {
 		transform: translateX(20px);

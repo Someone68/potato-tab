@@ -18,10 +18,14 @@
 			padding: 0;
 		}
 
+		:root {
+			--font: 'Iosevka Charon Mono', monospace;
+		}
+
 		body {
 			background-color: var(--cs-surface);
 			color: var(--cs-on-surface);
-			font-family: 'Iosevka Charon Mono', monospace;
+			font-family: var(--font);
 		}
 	}
 </style>
