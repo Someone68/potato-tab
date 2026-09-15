@@ -45,15 +45,13 @@
 
 <style>
 	div {
-		width: 100%;
-		height: 100vh;
-		inset: -20px;
+		position: absolute;
+		inset: -40px;
+		width: calc(100% + 80px);
+		height: calc(100vh + 80px);
 		background-size: cover;
 		background-position: center;
 		background-repeat: no-repeat;
-		position: absolute;
-		top: 0;
-		left: 0;
 		z-index: -1;
 	}
 </style>

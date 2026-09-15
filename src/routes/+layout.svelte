@@ -30,6 +30,9 @@
 			background-color: var(--cs-surface);
 			color: var(--cs-on-surface);
 			font-family: var(--font);
+
+			/* specific to potato-tab */
+			overflow: hidden;
 		}
 
 		h1 {
