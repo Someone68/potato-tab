@@ -11,6 +11,7 @@
 	import Dropdown from '$lib/components/dropdown.svelte';
 	import Switch from '$lib/components/switch.svelte';
 	import Slider from '$lib/components/slider.svelte';
+	import Button from '$lib/components/button.svelte';
 
 	// ---
 	// theme mgmt and colors
@@ -25,7 +26,8 @@
 		watchSystemMode,
 		DEFAULT_SEED,
 		type Theme,
-		type Mode
+		type Mode,
+		seedFromImage
 	} from '$lib/theme';
 	import Space from '$lib/components/space.svelte';
 	import type { BackgroundType, GradientSettings } from '$lib/misc';
@@ -87,6 +89,13 @@
 	// ---
 
 	let settingsOpen = $state(false);
+	let settingTheme = $state(false);
+
+	async function setThemeFromImage() {
+		settingTheme = true;
+		seed = await seedFromImage(settings.backgroundImage);
+		settingTheme = false;
+	}
 </script>
 
 <Background
@@ -135,7 +144,18 @@
 		<div class="proplist">
 			<hr />
 			<Space height={5} />
-			<h2>theme</h2>
+			<div class="property">
+				<h2>theme</h2>
+				<div class="circles">
+					<div class="circle" style="background-color: var(--cs-on-surface)"></div>
+					<div class="circle" style="background-color: var(--cs-primary)"></div>
+					<div class="circle" style="background-color: var(--cs-secondary)"></div>
+					<div class="circle" style="background-color: var(--cs-tertiary)"></div>
+					<div class="circle" style="background-color: var(--cs-primary-container)"></div>
+					<div class="circle" style="background-color: var(--cs-secondary-container)"></div>
+					<div class="circle" style="background-color: var(--cs-tertiary-container)"></div>
+				</div>
+			</div>
 			<div class="property">
 				<p>scheme</p>
 				<Dropdown
@@ -153,6 +173,15 @@
 				<p>color seed</p>
 				<ColorPicker bind:value={seed} />
 			</div>
+
+			{#if settings.backgroundType === 'image'}
+				<div class="property">
+					<p>use image</p>
+					<Button variant="primary" onclick={setThemeFromImage} disabled={settingTheme}
+						>get seed from image</Button
+					>
+				</div>
+			{/if}
 
 			<h2>background</h2>
 
@@ -241,5 +270,16 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+	}
+
+	.circles {
+		display: flex;
+		gap: 5px;
+	}
+
+	.circle {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
 	}
 </style>

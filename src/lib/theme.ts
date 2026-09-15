@@ -4,7 +4,9 @@ import {
 	MaterialDynamicColors,
 	argbFromHex,
 	hexFromArgb,
-	DynamicColor
+	DynamicColor,
+	QuantizerCelebi,
+	Score
 } from '@material/material-color-utilities';
 import { browser } from '$app/environment';
 
@@ -190,4 +192,84 @@ export function readToken(role: Role, fallback: string = ''): string {
 			.getPropertyValue(`${CSS_PREFIX}${kebab(role)}`)
 			.trim() || fallback
 	);
+}
+
+// image stuff
+
+function deterministic<T>(fn: () => T): T {
+	const real = Math.random;
+	let s = 0x2f6e2b1;
+	Math.random = () => ((s = (s * 1664525 + 1013904223) >>> 0), s / 0x100000000);
+	try {
+		return fn();
+	} finally {
+		Math.random = real;
+	}
+}
+
+const MAX_DIM = 128;
+async function loadImage(src: HTMLImageElement | Blob | string): Promise<HTMLImageElement> {
+	if (src instanceof HTMLImageElement) {
+		if (!src.complete) await src.decode();
+		return src;
+	}
+	const url = src instanceof Blob ? URL.createObjectURL(src) : src;
+	const img = new Image();
+	if (!(src instanceof Blob)) img.crossOrigin = 'anonymous';
+	img.src = url;
+	try {
+		await img.decode();
+	} finally {
+		if (src instanceof Blob) URL.revokeObjectURL(url);
+	}
+	return img;
+}
+
+function argbPixels(img: HTMLImageElement): number[] {
+	const w = img.naturalWidth || img.width;
+	const h = img.naturalHeight || img.height;
+	const scale = Math.min(1, MAX_DIM / Math.max(w, h));
+	const cw = Math.max(1, Math.round(w * scale));
+	const ch = Math.max(1, Math.round(h * scale));
+
+	const canvas = document.createElement('canvas');
+	canvas.width = cw;
+	canvas.height = ch;
+	const ctx = canvas.getContext('2d', { willReadFrequently: true });
+	if (!ctx) throw new Error('2d context unavailable');
+	ctx.drawImage(img, 0, 0, cw, ch);
+
+	const { data } = ctx.getImageData(0, 0, cw, ch);
+	const out: number[] = [];
+	for (let i = 0; i < data.length; i += 4) {
+		const a = data[i + 3];
+		out.push((a << 24) | (data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
+	}
+	return out;
+}
+
+const cache = new Map<string, string>();
+
+export async function seedFromImage(src: HTMLImageElement | Blob | string): Promise<string> {
+	const key =
+		typeof src === 'string'
+			? src
+			: src instanceof HTMLImageElement
+				? src.currentSrc || src.src
+				: null;
+	if (key && cache.has(key)) return cache.get(key)!;
+	if (!browser) return DEFAULT_SEED;
+	try {
+		const img = await loadImage(src);
+		const pixels = argbPixels(img);
+		const quantized = deterministic(() => QuantizerCelebi.quantize(pixels, 128));
+		const ranked = Score.score(quantized);
+		return normalizeSeed(hexFromArgb(ranked[0]));
+	} catch (e) {
+		console.warn('seedFromImage failed:', e);
+		return DEFAULT_SEED;
+	}
+
+	if (key) cache.set(key, seed);
+	return seed;
 }
