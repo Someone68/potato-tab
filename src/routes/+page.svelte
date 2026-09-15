@@ -12,6 +12,10 @@
 	import Switch from '$lib/components/switch.svelte';
 	import Slider from '$lib/components/slider.svelte';
 	import Button from '$lib/components/button.svelte';
+	import FileSelect from '$lib/components/file_select.svelte';
+
+	import { get, set, del } from 'idb-keyval';
+	import { onMount } from 'svelte';
 
 	// ---
 	// theme mgmt and colors
@@ -59,29 +63,79 @@
 	// other settings
 	// ---
 
+	type ImageSource = 'url' | 'upload';
+
 	type Settings = {
 		backgroundType: BackgroundType;
 		backgroundColor: string;
 		backgroundImage: string;
+		backgroundImageSource: ImageSource;
 		backgroundGradient: GradientSettings;
 		backgroundBrightness: number;
 		backgroundBlur: number;
 	};
 
-	const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('settings') : null;
-	const stored = JSON.parse(raw ?? 'null') ?? {};
+	function loadStored(): Partial<Settings> {
+		if (!browser) return {};
+		try {
+			return JSON.parse(localStorage.getItem('settings') ?? 'null') ?? {};
+		} catch {
+			return {};
+		}
+	}
+	const stored = loadStored();
 
 	let settings = $state<Settings>({
 		backgroundType: stored.backgroundType ?? 'color',
 		backgroundColor: stored.backgroundColor ?? 'default',
 		backgroundImage: stored.backgroundImage ?? '',
-		backgroundGradient: stored.backgroundGradient ?? {},
+		backgroundImageSource: stored.backgroundImageSource ?? 'url',
+		backgroundGradient: stored.backgroundGradient ?? {
+			angle: 'to bottom',
+			colors: ['#FFFFFF', '#000000']
+		},
 		backgroundBrightness: stored.backgroundBrightness ?? 100,
 		backgroundBlur: stored.backgroundBlur ?? 0
 	});
 
 	$effect(() => {
+		if (typeof localStorage === 'undefined') return;
 		localStorage.setItem('settings', JSON.stringify(settings));
+	});
+
+	let bgUrl = $state<string | null>(null);
+
+	const activeBg = $derived(
+		settings.backgroundType !== 'image'
+			? null
+			: settings.backgroundImageSource === 'upload'
+				? bgUrl
+				: settings.backgroundImage || null
+	);
+
+	onMount(async () => {
+		const blob = await get<Blob>('bg');
+		if (blob) show(blob);
+	});
+
+	async function onFile(
+		e: Event & { currentTarget: EventTarget & HTMLInputElement }
+	): Promise<void> {
+		const file = e.currentTarget.files?.[0];
+		if (!file) return;
+		await set('bg', file);
+		show(file);
+		settings.backgroundImageSource = 'upload'; // switch on upload
+	}
+
+	async function clearBg(): Promise<void> {
+		await del('bg');
+		show(null);
+		settings.backgroundImageSource = 'url';
+	}
+
+	$effect(() => () => {
+		if (bgUrl) URL.revokeObjectURL(bgUrl); // revoke on unmount
 	});
 
 	// ---
@@ -91,22 +145,45 @@
 	let settingsOpen = $state(false);
 	let settingTheme = $state(false);
 
-	async function setThemeFromImage() {
-		settingTheme = true;
-		seed = await seedFromImage(settings.backgroundImage);
-		settingTheme = false;
+	let bgBlob = $state<Blob | null>(null);
+
+	function show(blob: Blob | null) {
+		if (bgUrl) URL.revokeObjectURL(bgUrl);
+		bgUrl = blob ? URL.createObjectURL(blob) : null;
+		bgBlob = blob;
 	}
+
+	async function setThemeFromImage(): Promise<void> {
+		const src: Blob | string | null =
+			settings.backgroundImageSource === 'upload' ? bgBlob : settings.backgroundImage || null;
+		if (!src) return;
+
+		settingTheme = true;
+		try {
+			seed = await seedFromImage(src);
+		} finally {
+			settingTheme = false;
+		}
+	}
+
+	const moveElement = (arr: string[], from: number, to: number) => (
+		arr.splice(to, 0, arr.splice(from, 1)[0]),
+		arr
+	);
 </script>
 
 <Background
 	type={settings.backgroundType}
-	src={settings.backgroundImage}
+	src={activeBg ?? ''}
 	brightness={settings.backgroundBrightness}
 	blur={settings.backgroundBlur}
 	gradientSettings={settings.backgroundGradient}
 	color={settings.backgroundColor && settings.backgroundColor !== 'default'
 		? settings.backgroundColor
 		: bgColor}
+	onclick={() => {
+		settingsOpen = false;
+	}}
 />
 
 <Corner corner="top_left">
@@ -177,7 +254,7 @@
 			{#if settings.backgroundType === 'image'}
 				<div class="property">
 					<p>use image</p>
-					<Button variant="primary" onclick={setThemeFromImage} disabled={settingTheme}
+					<Button variant="primary" onclick={setThemeFromImage} disabled={settingTheme || !activeBg}
 						>get seed from image</Button
 					>
 				</div>
@@ -201,13 +278,39 @@
 
 			{#if settings.backgroundType === 'image'}
 				<div class="property">
-					<p>image url</p>
-					<TextInput
-						bind:value={() => settings.backgroundImage ?? '', (v) => (settings.backgroundImage = v)}
-						placeholder="https://..."
+					<p>image source</p>
+					<Dropdown
+						options={[
+							{ value: 'url', label: 'url' },
+							{ value: 'upload', label: 'upload' }
+						]}
+						bind:value={settings.backgroundImageSource}
 						variant="regular"
 					/>
 				</div>
+				{#if settings.backgroundImageSource === 'url'}
+					<div class="property">
+						<p>image url</p>
+						<TextInput
+							bind:value={
+								() => settings.backgroundImage ?? '', (v) => (settings.backgroundImage = v)
+							}
+							placeholder="https://..."
+							variant="regular"
+						/>
+					</div>
+				{:else}
+					<div class="property">
+						<p>image file</p>
+						<FileSelect onchange={onFile} />
+					</div>
+					{#if bgUrl}
+						<div class="property">
+							<p>remove</p>
+							<Button variant="error" onclick={clearBg}>clear image</Button>
+						</div>
+					{/if}
+				{/if}
 				<div class="property">
 					<p>image brightness</p>
 					<Slider
@@ -253,6 +356,74 @@
 						<ColorPicker bind:value={settings.backgroundColor} />
 					</div>
 				{/if}
+			{/if}
+
+			{#if settings.backgroundType === 'gradient'}
+				<div class="property">
+					<p>gradient angle</p>
+					<Dropdown
+						options={[
+							{ value: 'to bottom', label: 'to bottom' },
+							{ value: 'to top', label: 'to top' },
+							{ value: 'to left', label: 'to left' },
+							{ value: 'to right', label: 'to right' },
+							{ value: 'custom', label: 'custom' }
+						]}
+						bind:value={settings.backgroundGradient.angle}
+					/>
+				</div>
+				{#if settings.backgroundGradient.angle === 'custom'}
+					<div class="property">
+						<p>custom angle</p>
+						<TextInput number bind:value={settings.backgroundGradient.angle}></TextInput>
+					</div>
+				{/if}
+				<div class="property">
+					<p>gradient colors</p>
+				</div>
+
+				{#each settings.backgroundGradient.colors, i}
+					<div class="property">
+						<ColorPicker bind:value={settings.backgroundGradient.colors![i]} />
+						<div style="display: flex;">
+							<TextButton
+								variant="secondary"
+								iconOnly
+								icon="arrow_upward"
+								onclick={() => {
+									if (settings.backgroundGradient.colors)
+										moveElement(settings.backgroundGradient.colors, i, i - 1);
+								}}
+							></TextButton>
+							<TextButton
+								variant="tertiary"
+								iconOnly
+								icon="arrow_downward"
+								onclick={() => {
+									if (settings.backgroundGradient.colors)
+										moveElement(settings.backgroundGradient.colors, i, i + 1);
+								}}
+							></TextButton>
+							<TextButton
+								variant="error"
+								iconOnly
+								icon="delete"
+								onclick={() => {
+									settings.backgroundGradient.colors?.splice(i, 1);
+								}}
+							></TextButton>
+						</div>
+					</div>
+				{/each}
+
+				<Button
+					variant="primary"
+					onclick={() => {
+						settings.backgroundGradient.colors?.push('#FFFFFF');
+					}}
+				>
+					add color
+				</Button>
 			{/if}
 		</div>
 	</Sidebar>

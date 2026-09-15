@@ -5,13 +5,26 @@
 	interface Props extends Omit<HTMLInputAttributes, 'value'> {
 		variant?: Variant;
 		disabled?: boolean;
+		number?: boolean;
 		value?: string;
 	}
 
-	let { variant = 'regular', disabled = false, value = $bindable(''), ...rest }: Props = $props();
+	let {
+		variant = 'regular',
+		disabled = false,
+		number = false,
+		value = $bindable(''),
+		...rest
+	}: Props = $props();
 </script>
 
-<input type="text" class="{variant} {disabled ? 'disabled' : ''}" bind:value {disabled} {...rest} />
+<input
+	type={number ? 'number' : 'text'}
+	class="{variant} {disabled ? 'disabled' : ''}"
+	bind:value
+	{disabled}
+	{...rest}
+/>
 
 <style>
 	input {

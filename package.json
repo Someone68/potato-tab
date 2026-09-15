@@ -31,6 +31,7 @@
 		"typescript-eslint": "^8.60.1"
 	},
 	"dependencies": {
-		"@material/material-color-utilities": "0.3.0"
+		"@material/material-color-utilities": "0.3.0",
+		"idb-keyval": "^6.3.0"
 	}
 }
