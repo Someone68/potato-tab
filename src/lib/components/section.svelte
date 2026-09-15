@@ -13,7 +13,7 @@
 	} = $props();
 </script>
 
-<section class={corner} style={border ? undefined : 'border: none;'} {...rest}>
+<section class="{corner} {border ? 'border' : ''}" {...rest}>
 	{@render children()}
 </section>
 
@@ -24,15 +24,19 @@
 		&.bottom_left {
 			border-left: 4px solid var(--cs-outline);
 			&.top_left {
-				padding: 0 12px;
-				left: 12px;
+				padding: 0 10px;
+				left: 10px;
 				top: 10px;
 			}
 
 			&.bottom_left {
-				padding: 0 12px;
-				left: 12px;
+				padding: 0 10px;
+				left: 10px;
 				bottom: 10px;
+			}
+
+			&:not(.border) {
+				padding-left: 2px;
 			}
 		}
 
@@ -40,16 +44,24 @@
 		&.bottom_right {
 			border-right: 4px solid var(--cs-outline);
 			&.top_right {
-				padding: 0 12px;
-				right: 12px;
+				padding: 0 10px;
+				right: 10px;
 				top: 10px;
 			}
 
 			&.bottom_right {
-				padding: 0 12px;
-				right: 12px;
+				padding: 0 10px;
+				right: 10px;
 				bottom: 10px;
 			}
+
+			&:not(.border) {
+				padding-right: 2px;
+			}
+		}
+
+		&:not(.border) {
+			border: none;
 		}
 	}
 </style>

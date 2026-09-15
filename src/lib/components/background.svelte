@@ -1,11 +1,6 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
-
-	type BackgroundType = 'image' | 'color' | 'gradient';
-	type GradientSettings = {
-		angle?: string;
-		colors?: string[];
-	};
+	import type { BackgroundType, GradientSettings } from '../misc';
 
 	type Props = HTMLAttributes<HTMLDivElement> & {
 		class?: string;
@@ -20,7 +15,7 @@
 	let {
 		class: className = '',
 		type = 'color',
-		src = '',
+		src = $bindable(''),
 		color = '#0b0e14',
 		gradientSettings = {},
 		brightness = 100,

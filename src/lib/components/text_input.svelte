@@ -1,16 +1,17 @@
 <script lang="ts">
-	import type { HTMLAttributes } from 'svelte/elements';
+	import type { HTMLInputAttributes } from 'svelte/elements';
 	import type { Variant } from '$lib/misc';
 
-	interface Props extends HTMLAttributes<HTMLInputElement> {
+	interface Props extends Omit<HTMLInputAttributes, 'value'> {
 		variant?: Variant;
 		disabled?: boolean;
+		value?: string;
 	}
 
-	let { variant = 'regular', disabled = false, ...rest }: Props = $props();
+	let { variant = 'regular', disabled = false, value = $bindable(''), ...rest }: Props = $props();
 </script>
 
-<input type="text" class="{variant} {disabled ? 'disabled' : ''}" {...rest} />
+<input type="text" class="{variant} {disabled ? 'disabled' : ''}" bind:value {disabled} {...rest} />
 
 <style>
 	input {

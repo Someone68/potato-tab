@@ -1,10 +1,17 @@
-<script>
+<script lang="ts">
+	import type { HTMLAttributes } from 'svelte/elements';
+
 	let {
 		checked = $bindable(false),
 		label = '',
 		disabled = false,
 		name = undefined,
 		...rest
+	}: Omit<HTMLAttributes<HTMLInputElement>, 'children'> & {
+		checked?: boolean;
+		label?: string;
+		disabled?: boolean;
+		name?: string;
 	} = $props();
 </script>
 

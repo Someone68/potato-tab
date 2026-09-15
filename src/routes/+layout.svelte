@@ -6,6 +6,10 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<link
+		rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0"
+	/>
 </svelte:head>
 
 {@render children()}
@@ -26,6 +30,26 @@
 			background-color: var(--cs-surface);
 			color: var(--cs-on-surface);
 			font-family: var(--font);
+		}
+
+		h1 {
+			font-size: 2rem;
+			font-weight: bold;
+		}
+
+		h2 {
+			font-size: 1.5rem;
+			font-weight: bold;
+		}
+
+		h3 {
+			font-size: 1.25rem;
+			font-weight: bold;
+		}
+
+		p {
+			font-size: 1rem;
+			font-weight: normal;
 		}
 	}
 </style>
